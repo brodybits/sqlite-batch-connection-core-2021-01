@@ -51,6 +51,7 @@ with support available here: [github.com / brodybits / ask-me-anything / issues]
 - Not tested with `Infinity`, `-Infinity`, or `NaN` values.
 - Not able to close database connection and release internal resources.
 - Hard limit of 1000 open SQLite database connections, which can be changed by defining `SCC_MAXIMUM_CONNECTIONS` to configure the hard limit when building (low-level)
+- Minimum supported Android API is now 22 (Android 5.1), which is consistent with cordova-android version 9.0.0.
 - The API was not designed to support parallel database access through the same database connection. For parallel database access it is recommended to open multiple SQLite connections to the same database file name.
 - A limited number of historical SQLite features are disabled since the `SQLITE_DBCONFIG_DEFENSIVE` option is enabled (unless `NO_SCC_DBCONFIG_DEFENSIVE` is defined when building) ref: <https://www.sqlite.org/c3ref/c_dbconfig_defensive.html#sqlitedbconfigdefensive>
 - Background threading would need to be done in a higher-level component, which should be straightforward on both Android and iOS, as now demonstrated by the Cordova demo plugin.
