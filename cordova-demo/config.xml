@@ -1,3 +1,4 @@
 <widget id="cc.demo" version="0.0.1-dev">
   <name>demo</name>
+  <content src="index.html"/>
 </widget>
