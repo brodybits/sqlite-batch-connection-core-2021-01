@@ -88,18 +88,20 @@ static void test_01() {
 
   TEST_ASSERT_ALWAYS(connection_id > 0);
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_begin_statement(connection_id, "SELECT 1")
-    );
-
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
-    scc_end_statement(connection_id)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
-    21, // SQLite API abuse - as reported by this library (not from SQLite3)
+    0, // SQLite OK
     scc_end_statement(connection_id)
-    );
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    21, // SQLite API ABUSE - as reported by this library (not from SQLite3)
+    scc_end_statement(connection_id)
+  );
 }
 
 static void test_02() {
@@ -108,19 +110,20 @@ static void test_02() {
   TEST_ASSERT_ALWAYS(connection_id > 0);
 
   // syntax error
-  TEST_ASSERT_INT_EQUALS(1, // SQLite ERROR
+  TEST_ASSERT_INT_EQUALS(
+    1, // SQLite ERROR
     scc_begin_statement(connection_id, "SLCT 1")
-    );
+  );
 
   TEST_ASSERT_STRING_EQUALS(
     "near \"SLCT\": syntax error",
     scc_get_last_error_message(connection_id)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
-    21, // SQLite API abuse - as reported by this library (not from SQLite3)
+    21, // SQLite API ABUSE - as reported by this library (not from SQLite3)
     scc_end_statement(connection_id)
-    );
+  );
 }
 
 static void test_03() {
@@ -128,38 +131,45 @@ static void test_03() {
 
   TEST_ASSERT_ALWAYS(connection_id > 0);
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_begin_statement(connection_id, "SELECT UPPER('Test') AS myResult")
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(100, // SQLite rows
+  TEST_ASSERT_INT_EQUALS(
+    100, // SQLite ROWS
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(1,
+  TEST_ASSERT_INT_EQUALS(
+    1,
     scc_get_column_count(connection_id)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("myResult",
+  TEST_ASSERT_STRING_EQUALS(
+    "myResult",
     scc_get_column_name(connection_id, 0)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
     SCC_COLUMN_TYPE_TEXT,
     scc_get_column_type(connection_id, 0)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("TEST",
+  TEST_ASSERT_STRING_EQUALS(
+    "TEST",
     scc_get_column_text(connection_id, 0)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(101, // SQLite done
+  TEST_ASSERT_INT_EQUALS(
+    101, // SQLite DONE
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_end_statement(connection_id)
-    );
+  );
 }
 
 static void test_04() {
@@ -167,37 +177,45 @@ static void test_04() {
 
   TEST_ASSERT_ALWAYS(connection_id > 0);
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_begin_statement(connection_id, "SELECT UPPER(?) AS myResult")
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_bind_text(connection_id, 1, "Test")
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(100, // SQLite rows
+  TEST_ASSERT_INT_EQUALS(
+    100, // SQLite ROWS
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(1,
+  TEST_ASSERT_INT_EQUALS(
+    1,
     scc_get_column_count(connection_id)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("myResult",
+  TEST_ASSERT_STRING_EQUALS(
+    "myResult",
     scc_get_column_name(connection_id, 0)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("TEST",
+  TEST_ASSERT_STRING_EQUALS(
+    "TEST",
     scc_get_column_text(connection_id, 0)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(101, // SQLite done
+  TEST_ASSERT_INT_EQUALS(
+    101, // SQLite DONE
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_end_statement(connection_id)
-    );
+  );
 }
 
 static void test_05() {
@@ -205,59 +223,70 @@ static void test_05() {
 
   TEST_ASSERT_ALWAYS(connection_id > 0);
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_begin_statement(connection_id, "SELECT UPPER(?),?")
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_bind_text(connection_id, 1, "Test")
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_bind_text(connection_id, 2, "abc")
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(100, // SQLite rows
+  TEST_ASSERT_INT_EQUALS(
+    100, // SQLite ROWS
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(2,
+  TEST_ASSERT_INT_EQUALS(
+    2,
     scc_get_column_count(connection_id)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("UPPER(?)",
+  TEST_ASSERT_STRING_EQUALS(
+    "UPPER(?)",
     scc_get_column_name(connection_id, 0)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
     SCC_COLUMN_TYPE_TEXT,
     scc_get_column_type(connection_id, 0)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("TEST",
+  TEST_ASSERT_STRING_EQUALS(
+    "TEST",
     scc_get_column_text(connection_id, 0)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("?",
+  TEST_ASSERT_STRING_EQUALS(
+    "?",
     scc_get_column_name(connection_id, 1)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
     SCC_COLUMN_TYPE_TEXT,
     scc_get_column_type(connection_id, 1)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("abc",
+  TEST_ASSERT_STRING_EQUALS(
+    "abc",
     scc_get_column_text(connection_id, 1)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(101, // SQLite done
+  TEST_ASSERT_INT_EQUALS(
+    101, // SQLite DONE
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_end_statement(connection_id)
-    );
+  );
 }
 
 static void test_06() {
@@ -265,63 +294,73 @@ static void test_06() {
 
   TEST_ASSERT_ALWAYS(connection_id > 0);
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
-    scc_begin_statement(connection_id,
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
+    scc_begin_statement(
+      connection_id,
       "SELECT 10.0 * ? AS myResult, -? as result2"
-      )
-    );
+    )
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_bind_double(connection_id, 1, 1234567.890123)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_bind_double(connection_id, 2, 7.89)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(100, // SQLite rows
+  TEST_ASSERT_INT_EQUALS(
+    100, // SQLite ROWS
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(2,
+  TEST_ASSERT_INT_EQUALS(
+    2,
     scc_get_column_count(connection_id)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("myResult",
+  TEST_ASSERT_STRING_EQUALS(
+    "myResult",
     scc_get_column_name(connection_id, 0)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
     SCC_COLUMN_TYPE_FLOAT,
     scc_get_column_type(connection_id, 0)
-    );
+  );
 
   TEST_ASSERT_DOUBLE_EQUALS(
     12345678.90123,
     scc_get_column_double(connection_id, 0)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("result2",
+  TEST_ASSERT_STRING_EQUALS(
+    "result2",
     scc_get_column_name(connection_id, 1)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
     SCC_COLUMN_TYPE_FLOAT,
     scc_get_column_type(connection_id, 1)
-    );
+  );
 
   TEST_ASSERT_DOUBLE_EQUALS(
     -7.89,
     scc_get_column_double(connection_id, 1)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(101, // SQLite done
+  TEST_ASSERT_INT_EQUALS(
+    101, // SQLite DONE
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_end_statement(connection_id)
-    );
+  );
 }
 
 static void test_07() {
@@ -329,58 +368,68 @@ static void test_07() {
 
   TEST_ASSERT_ALWAYS(connection_id > 0);
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
-    scc_begin_statement(connection_id,
-      "SELECT 10 * ? AS myResult, -? AS result2")
-    );
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
+    scc_begin_statement(
+      connection_id,
+      "SELECT 10 * ? AS myResult, -? AS result2"
+    )
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_bind_long(connection_id, 1, 1234)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_bind_long(connection_id, 2, 1234567890123456789)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(100, // SQLite rows
+  TEST_ASSERT_INT_EQUALS(
+    100, // SQLite ROWS
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(2,
+  TEST_ASSERT_INT_EQUALS(
+    2,
     scc_get_column_count(connection_id)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("myResult",
+  TEST_ASSERT_STRING_EQUALS(
+    "myResult",
     scc_get_column_name(connection_id, 0)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
     SCC_COLUMN_TYPE_INTEGER,
     scc_get_column_type(connection_id, 0)
-    );
+  );
 
   TEST_ASSERT_LONG_EQUALS(
     12340,
     scc_get_column_double(connection_id, 0)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("result2",
+  TEST_ASSERT_STRING_EQUALS(
+    "result2",
     scc_get_column_name(connection_id, 1)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
     SCC_COLUMN_TYPE_INTEGER,
     scc_get_column_type(connection_id, 1)
-    );
+  );
 
   TEST_ASSERT_LONG_EQUALS(
     -1234567890123456789,
     scc_get_column_long(connection_id, 1)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_end_statement(connection_id)
-    );
+  );
 }
 
 static void test_08() {
@@ -388,58 +437,66 @@ static void test_08() {
 
   TEST_ASSERT_ALWAYS(connection_id > 0);
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_begin_statement(connection_id, "SELECT UPPER(?), ?")
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_bind_text(connection_id, 1, "Test")
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_bind_null(connection_id, 2)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(100, // SQLite rows
+  TEST_ASSERT_INT_EQUALS(
+    100, // SQLite ROWS
     scc_step(connection_id)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(2,
+  TEST_ASSERT_INT_EQUALS(
+    2,
     scc_get_column_count(connection_id)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("UPPER(?)",
+  TEST_ASSERT_STRING_EQUALS(
+    "UPPER(?)",
     scc_get_column_name(connection_id, 0)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
     SCC_COLUMN_TYPE_TEXT,
     scc_get_column_type(connection_id, 0)
-    );
+  );
 
   TEST_ASSERT_STRING_EQUALS(
     "TEST",
     scc_get_column_text(connection_id, 0)
-    );
+  );
 
-  TEST_ASSERT_STRING_EQUALS("?",
+  TEST_ASSERT_STRING_EQUALS(
+    "?",
     scc_get_column_name(connection_id, 1)
-    );
+  );
 
   TEST_ASSERT_INT_EQUALS(
     SCC_COLUMN_TYPE_NULL,
     scc_get_column_type(connection_id, 1)
-    );
+  );
 
   // ensure this does not crash:
   TEST_ASSERT_STRING_EQUALS(
     "",
     scc_get_column_text(connection_id, 1)
-    );
+  );
 
-  TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
     scc_end_statement(connection_id)
-    );
+  );
 }
 
 static void test_11() {
@@ -451,34 +508,41 @@ static void test_11() {
   TEST_ASSERT_INT_EQUALS(0, scc_get_last_insert_rowid(connection_id));
 
   {
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
-      scc_begin_statement(connection_id,
-        "SELECT UPPER('Test') AS myResult")
-      );
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
+      scc_begin_statement(
+        connection_id,
+        "SELECT UPPER('Test') AS myResult"
+      )
+    );
 
-    TEST_ASSERT_INT_EQUALS(100, // SQLite rows
+    TEST_ASSERT_INT_EQUALS(
+      100, // SQLite ROWS
       scc_step(connection_id)
       );
 
-    TEST_ASSERT_INT_EQUALS(1,
+    TEST_ASSERT_INT_EQUALS(
+      1,
       scc_get_column_count(connection_id)
-      );
+    );
 
-    TEST_ASSERT_STRING_EQUALS("myResult",
+    TEST_ASSERT_STRING_EQUALS(
+      "myResult",
       scc_get_column_name(connection_id, 0)
-      );
+    );
 
     TEST_ASSERT_STRING_EQUALS(
       "TEST",
       scc_get_column_text(connection_id, 0)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(0, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(0, scc_get_last_insert_rowid(connection_id));
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(0, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(0, scc_get_last_insert_rowid(connection_id));
@@ -487,15 +551,17 @@ static void test_11() {
   {
     TEST_ASSERT_INT_EQUALS(0, // SQLite OK
       scc_begin_statement(connection_id, "CREATE TABLE Testing (data)")
-      );
+    );
 
-    TEST_ASSERT_INT_EQUALS(101, // SQLite done
+    TEST_ASSERT_INT_EQUALS(
+      101, // SQLite DONE
       scc_step(connection_id)
-      );
+    );
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(0, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(0, scc_get_last_insert_rowid(connection_id));
@@ -504,42 +570,48 @@ static void test_11() {
   {
     // zero (0) rows expected
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_begin_statement(connection_id, "SELECT * FROM Testing")
-      );
+    );
 
-    TEST_ASSERT_INT_EQUALS(101, // SQLite done
+    TEST_ASSERT_INT_EQUALS(
+      101, // SQLite DONE
       scc_step(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(0, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(0, scc_get_last_insert_rowid(connection_id));
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(0, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(0, scc_get_last_insert_rowid(connection_id));
   }
 
   {
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_begin_statement(connection_id,
         "INSERT INTO Testing VALUES ('test data')"
-        )
-      );
+      )
+    );
 
-    TEST_ASSERT_INT_EQUALS(101, // SQLite done
+    TEST_ASSERT_INT_EQUALS(
+      101, // SQLite DONE
       scc_step(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(1, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(1, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
@@ -548,38 +620,43 @@ static void test_11() {
   {
     // 1 row expected
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_begin_statement(connection_id, "SELECT * FROM Testing")
-      );
+    );
 
-    TEST_ASSERT_INT_EQUALS(100, // SQLite rows
+    TEST_ASSERT_INT_EQUALS(
+      100, // SQLite ROWS
       scc_step(connection_id)
-      );
+    );
 
-    TEST_ASSERT_INT_EQUALS(1,
+    TEST_ASSERT_INT_EQUALS(
+      1,
       scc_get_column_count(connection_id)
-      );
+    );
 
-    TEST_ASSERT_STRING_EQUALS("data",
+    TEST_ASSERT_STRING_EQUALS(
+      "data",
       scc_get_column_name(connection_id, 0)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(
       SCC_COLUMN_TYPE_TEXT,
       scc_get_column_type(connection_id, 0)
-      );
+    );
 
     TEST_ASSERT_STRING_EQUALS(
       "test data",
       scc_get_column_text(connection_id, 0)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(1, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(1, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
@@ -595,103 +672,121 @@ static void test_12() {
   TEST_ASSERT_INT_EQUALS(0, scc_get_last_insert_rowid(connection_id));
 
   {
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_begin_statement(connection_id, "CREATE TABLE Testing (data)")
-      );
+    );
 
-    TEST_ASSERT_INT_EQUALS(101, // SQLite done
+    TEST_ASSERT_INT_EQUALS(
+      101, // SQLite DONE
       scc_step(connection_id)
-      );
+    );
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(0, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(0, scc_get_last_insert_rowid(connection_id));
   }
 
   {
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
-      scc_begin_statement(connection_id,
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
+      scc_begin_statement(
+        connection_id,
         "INSERT INTO Testing VALUES ('test data')"
-        )
-      );
+      )
+    );
 
-    TEST_ASSERT_INT_EQUALS(101, // SQLite done
+    TEST_ASSERT_INT_EQUALS(
+      101, // SQLite DONE
       scc_step(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(1, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(1, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
   }
 
   {
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_begin_statement(connection_id, "DELETE FROM Testing")
-      );
+    );
 
-    TEST_ASSERT_INT_EQUALS(101, // SQLite done
+    TEST_ASSERT_INT_EQUALS(
+      101, // SQLite DONE
       scc_step(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(2, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(2, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
   }
 
   {
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
-      scc_begin_statement(connection_id,
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
+      scc_begin_statement(
+        connection_id,
         "INSERT INTO Testing VALUES ('test 2')"
-        )
-      );
+      )
+    );
 
-    TEST_ASSERT_INT_EQUALS(101, // SQLite done
+    TEST_ASSERT_INT_EQUALS(
+      101, // SQLite DONE
       scc_step(connection_id)
       );
 
     TEST_ASSERT_INT_EQUALS(3, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(3, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(1, scc_get_last_insert_rowid(connection_id));
   }
 
   {
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
-      scc_begin_statement(connection_id,
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
+      scc_begin_statement(
+        connection_id,
         "INSERT INTO Testing VALUES ('test 3')"
-        )
-      );
+      )
+    );
 
-    TEST_ASSERT_INT_EQUALS(101, // SQLite done
+    TEST_ASSERT_INT_EQUALS(
+      101, // SQLite DONE
       scc_step(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(4, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(2, scc_get_last_insert_rowid(connection_id));
 
-    TEST_ASSERT_INT_EQUALS(0, // SQLite OK
+    TEST_ASSERT_INT_EQUALS(
+      0, // SQLite OK
       scc_end_statement(connection_id)
-      );
+    );
 
     TEST_ASSERT_INT_EQUALS(4, scc_get_total_changes(connection_id));
     TEST_ASSERT_INT_EQUALS(2, scc_get_last_insert_rowid(connection_id));
