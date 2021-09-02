@@ -4,6 +4,25 @@
 
 @implementation SQLiteBatchCore
 
+static int bindObjectValue(int connection_id, NSObject * value, int index)
+{
+  int prepareResult;
+
+  if (value == nil) {
+    prepareResult = scc_bind_null(connection_id, index);
+  } else if ([value isKindOfClass: [NSNumber class]]) {
+    prepareResult =
+      scc_bind_double(connection_id, index, [(NSNumber *)value doubleValue]);
+  } else if ([value isKindOfClass: [NSString class]]) {
+    prepareResult =
+      scc_bind_text(connection_id, index, [(NSString *)value cString]);
+  } else {
+    prepareResult = scc_bind_null(connection_id, index);
+  }
+
+  return prepareResult;
+}
+
 + (void) initialize
 {
   scc_init();
@@ -27,26 +46,37 @@
 
     NSString * statement = [entry objectAtIndex: 0];
 
-    NSArray * bind = [entry objectAtIndex: 1];
-
     int prepareResult =
       scc_begin_statement(connection_id, [statement cString]);
 
-    if (prepareResult == 0) {
+    if (prepareResult != 0) {
+      // do nothing here; error will be handled below
+    } else if ([[entry objectAtIndex: 1] isKindOfClass: [NSDictionary class]]) {
+      NSDictionary * parameters = [entry objectAtIndex: 1];
+
+      for (NSString * key in parameters) {
+        // NOTE: zero parameter index will result in a bind error below.
+        int parameter_index =
+          scc_bind_parameter_index(connection_id, [key cString]);
+
+        NSObject * bindValue = [parameters valueForKey: key];
+
+        prepareResult =
+          bindObjectValue(connection_id, bindValue, parameter_index);
+
+	// break here & report error in case a named parameter is not found
+        if (prepareResult != 0) break;
+      }
+    } else {
+      NSArray * bind = [entry objectAtIndex: 1];
+
       for (int j=0; j < [bind count]; ++j) {
         NSObject * bindValue = [bind objectAtIndex: j];
 
-        if (bindValue == nil) {
-          prepareResult = scc_bind_null(connection_id, 1 + j);
-        } else if ([bindValue isKindOfClass: [NSNumber class]]) {
-          prepareResult = scc_bind_double(connection_id, 1 + j,
-            [(NSNumber *)bindValue doubleValue]);
-        } else if ([bindValue isKindOfClass: [NSString class]]) {
-          prepareResult = scc_bind_text(connection_id, 1 + j,
-              [(NSString *)bindValue cString]);
-        } else {
-          prepareResult = scc_bind_null(connection_id, 1 + j);
-        }
+        prepareResult = bindObjectValue(connection_id, bindValue, 1 + j);
+
+        // should only break if there are too many parameters here
+        if (prepareResult != 0) break;
       }
     }
 

@@ -161,7 +161,12 @@ function batchDemo (connectionId) {
       ["INSERT INTO Testing VALUES ('test data 2')", []],
       ["INSERT INTO Testing VALUES ('test data 3')", []],
       ['SELECT * FROM Testing', []],
-      ["SELECT 'xyz'", []]
+      ["SELECT 'xyz'", []],
+      [
+        'SELECT ABS(:b) AS absValue, UPPER(:a) AS upperValue',
+        { ':a': 'Text', ':b': -123.456 }
+      ],
+      ['SELECT :a, :c;', { ':a': 1, ':b': 2, ':c': 3 }]
     ],
     batchCallback
   )

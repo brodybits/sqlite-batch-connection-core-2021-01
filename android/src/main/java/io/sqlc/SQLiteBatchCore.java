@@ -27,24 +27,35 @@ public class SQLiteBatchCore {
           result.put("message", SCCoreGlue.scc_get_last_error_message(mydbc));
           results.put(result);
         } else {
-          JSONArray bind = entry.getJSONArray(1);
-
-          final int bindCount = bind.length();
-
           int bindResult = 0; // SQLite OK
 
-          for (int j = 0; j < bindCount; ++j) {
-            final Object o = bind.get(j);
+          if ((entry.get(1) instanceof JSONArray)) {
+            final JSONArray bind = entry.getJSONArray(1);
+            final int bindCount = bind.length();
 
-            if (o instanceof Number) {
-              bindResult =
-                SCCoreGlue.scc_bind_double(mydbc, 1 + j, bind.optDouble(j));
-            } else if (o instanceof String) {
-              bindResult =
-                SCCoreGlue.scc_bind_text(mydbc, 1 + j, o.toString());
-            } else {
-              bindResult =
-                SCCoreGlue.scc_bind_null(mydbc, 1 + j);
+            for (int j = 0; j < bindCount; ++j) {
+              final Object o = bind.get(j);
+
+              bindResult = bindObjectValue(mydbc, o, 1 + j);
+
+              // should only break if there are too many parameters here
+              if (bindResult != 0) break;
+            }
+          } else {
+            final JSONObject bind = entry.getJSONObject(1);
+            final int bindCount = bind.length();
+            final JSONArray names = bind.names();
+
+            for (int j = 0; j < bindCount; ++j) {
+              final String name = names.getString(j);
+              final Object o = bind.get(name);
+              final int bindIndex =
+                SCCoreGlue.scc_bind_parameter_index(mydbc, name);
+
+              bindResult = bindObjectValue(mydbc, o, bindIndex);
+
+              // break here & report error if a named parameter is not found
+              if (bindResult != 0) break;
             }
           }
 
@@ -125,6 +136,21 @@ public class SQLiteBatchCore {
       // NOT EXPECTED - internal error:
       throw new RuntimeException(e);
     }
+  }
+
+  static private int bindObjectValue(int mydbc, Object value, int index)
+  {
+    int bindResult = 0; // SQLite OK
+
+    if (value instanceof Number) {
+      bindResult =
+        SCCoreGlue.scc_bind_double(mydbc, index, ((Number)value).doubleValue());
+    } else if (value instanceof String) {
+      bindResult = SCCoreGlue.scc_bind_text(mydbc, index, value.toString());
+    } else {
+      bindResult = SCCoreGlue.scc_bind_null(mydbc, index);
+    }
+    return bindResult;
   }
 
   static {

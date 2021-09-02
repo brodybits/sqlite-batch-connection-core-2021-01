@@ -19,9 +19,11 @@ function executeBatch (connectionId, batchList, cb) {
     batchList.map(function (entry) {
       return [
         entry[0],
-        entry[1].map(function (parameter) {
-          return parameter
-        })
+        Array.isArray(entry[1])
+          ? entry[1].map(function (parameter) {
+              return parameter
+            })
+          : Object.assign({}, entry[1])
       ]
     })
   ])

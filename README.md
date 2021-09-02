@@ -64,7 +64,6 @@ with support available here: [github.com / brodybits / ask-me-anything / issues]
 
 ### Limitations of higher-level classes
 
-- Missing support for named parameters.
 - For Apache Cordova, a helper plugin such as `cordova-sqlite-storage-file` (recommended) or `cordova-plugin-file` (recommended for external filesystem access on Android) should be used to resolve an absolute database file path before opening it. Similar helper components would be recommended on React Native.
 - The `sqlite-connection-core.h` API header file and Java interface class have very limited documentation comments.
 - Missing formal tests, demonstration, and documentation of SQLiteBatchCore class for Android and iOS, which is demonstrated in `cordova-sqlite-demo-plugin` subdirectory of `cordova-demo`.
@@ -459,7 +458,12 @@ function batchDemo (connectionId) {
       ["INSERT INTO Testing VALUES ('test data 2')", []],
       ["INSERT INTO Testing VALUES ('test data 3')", []],
       ['SELECT * FROM Testing', []],
-      ["SELECT 'xyz'", []]
+      ["SELECT 'xyz'", []],
+      [
+        'SELECT ABS(:b) AS absValue, UPPER(:a) AS upperValue',
+        { ':a': 'Text', ':b': -123.456 }
+      ],
+      ['SELECT :a, :c;', { ':a': 1, ':b': 2, ':c': 3 }]
     ],
     batchCallback
   )
@@ -554,7 +558,13 @@ first file resut set in JSON string format (reformatted by `prettier-standard`):
     "columns": ["data"],
     "rows": [["test data 2"], ["test data 3"]]
   },
-  { "status": 0, "columns": ["'xyz'"], "rows": [["xyz"]] }
+  { "status": 0, "columns": ["'xyz'"], "rows": [["xyz"]] },
+  {
+    "status": 0,
+    "columns": ["absValue", "upperValue"],
+    "rows": [[123.456, "TEXT"]]
+  },
+  { "status": 1, "message": "column index out of range" }
 ]
 ```
 
