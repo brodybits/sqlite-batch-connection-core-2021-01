@@ -1,3 +1,6 @@
+/* for prettier-standard --lint (eslint): */
+/* global cordova */
+
 function openDatabaseConnection (options, cb, errorCallback) {
   cordova.exec(
     cb,
