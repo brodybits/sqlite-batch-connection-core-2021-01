@@ -64,6 +64,7 @@ with support available here: [github.com / brodybits / ask-me-anything / issues]
 
 ### Limitations of higher-level classes
 
+- Missing support for named parameters.
 - For Apache Cordova, a helper plugin such as `cordova-sqlite-storage-file` (recommended) or `cordova-plugin-file` (recommended for external filesystem access on Android) should be used to resolve an absolute database file path before opening it. Similar helper components would be recommended on React Native.
 - The `sqlite-connection-core.h` API header file and Java interface class have very limited documentation comments.
 - Missing formal tests, demonstration, and documentation of SQLiteBatchCore class for Android and iOS, which is demonstrated in `cordova-sqlite-demo-plugin` subdirectory of `cordova-demo`.
@@ -93,20 +94,33 @@ static void demo() {
     exit(1);
   }
 
-  result_check = scc_begin_statement(connection_id,
-    "SELECT UPPER(?) AS result1, -? as result2");
+  result_check = scc_begin_statement(
+    connection_id,
+    "SELECT ABS(:b) AS absValue, UPPER(:a) AS upperValue"
+  );
+
   if (result_check != 0) {
     fprintf(stderr, "could not prepare statement");
     exit(1);
   }
 
-  result_check = scc_bind_text(connection_id, 1, "Test");
+  result_check = scc_bind_text(
+    connection_id,
+    scc_bind_parameter_index(connection_id, ":a"),
+    "Text"
+  );
+
   if (result_check != 0) {
     fprintf(stderr, "could not bind text");
     exit(1);
   }
 
-  result_check = scc_bind_double(connection_id, 2, 123.456789);
+  result_check = scc_bind_double(
+    connection_id,
+    scc_bind_parameter_index(connection_id, ":b"),
+    -123.456789
+  );
+
   if (result_check != 0) {
     fprintf(stderr, "could not bind double");
     exit(1);
@@ -164,18 +178,31 @@ class SQLiteDemo {
 
     int resultCheck;
 
-    resultCheck = SCCoreGlue.scc_begin_statement(connection_id,
-      "SELECT UPPER(?) AS result1, -? as result2");
+    resultCheck = SCCoreGlue.scc_begin_statement(
+      connection_id,
+      "SELECT ABS(:b) AS absValue, UPPER(:a) AS upperValue"
+    );
+
     if (resultCheck != 0) {
       throw new RuntimeException("could not prepare statement");
     }
 
-    resultCheck = SCCoreGlue.scc_bind_text(connection_id, 1, "Test");
+    resultCheck = SCCoreGlue.scc_bind_text(
+      connection_id,
+      SCCoreGlue.scc_bind_parameter_index(connection_id, ":a"),
+      "Text"
+    );
+
     if (resultCheck != 0) {
       throw new RuntimeException("could not bind text");
     }
 
-    resultCheck = SCCoreGlue.scc_bind_double(connection_id, 2, 123.456789);
+    resultCheck = SCCoreGlue.scc_bind_double(
+      connection_id,
+      SCCoreGlue.scc_bind_parameter_index(connection_id, ":b"),
+      -123.456789
+    );
+
     if (resultCheck != 0) {
       throw new RuntimeException("could not bind double");
     }
@@ -224,11 +251,11 @@ The C and Java samples above would both show the following output:
 ```
 column count: 2
 column index: 0
-  column type: 0
-  text value: TEST
-column index: 1
   column type: 1
-  double column value: -123.456789
+  double column value: 123.456789
+column index: 1
+  column type: 0
+  text value: TEXT
 ```
 
 ### Apache Cordova demo app

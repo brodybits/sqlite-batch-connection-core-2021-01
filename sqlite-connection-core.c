@@ -151,6 +151,27 @@ int scc_begin_statement(int connection_id, const char * statement)
   }
 }
 
+int scc_bind_parameter_index(int connection_id, const char * name)
+{
+  if (connection_id < 0) {
+    return 0; // no valid parameter index here
+  } else {
+    scc_record_ref r = &scc_record_list[connection_id];
+    sqlite3_stmt * st;
+    int ret;
+
+    START_REC_ST_MUTEX(r);
+    st = r->_st;
+    if (st == NULL) {
+      ret = 0; // no valid parameter index here
+    } else {
+      ret = sqlite3_bind_parameter_index(st, name);
+    }
+    END_REC_ST_MUTEX(r);
+    return ret;
+  }
+}
+
 int scc_bind_text(int connection_id, int index, const char * text)
 {
   if (connection_id < 0) {

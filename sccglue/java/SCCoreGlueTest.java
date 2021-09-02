@@ -577,6 +577,88 @@ class SCCoreGlueTest {
     assertTrue(connection < 0);
   }
 
+  static void test_31() {
+    final int connection = testOpenMemoryConnection("test_31");
+
+    assertTrue(connection > 0);
+
+    assertEquals(
+      0, // SQLite OK
+      SCCoreGlue.scc_begin_statement(
+        connection,
+        "SELECT ABS(:b) AS absValue, UPPER(:a) AS upperValue"
+      )
+    );
+
+    assertEquals(
+      0, // SQLite OK
+      SCCoreGlue.scc_bind_double(
+        connection,
+        SCCoreGlue.scc_bind_parameter_index(connection, ":b"),
+        -123.456
+      )
+    );
+
+    assertEquals(
+      0, // SQLite OK
+      SCCoreGlue.scc_bind_text(
+        connection,
+        SCCoreGlue.scc_bind_parameter_index(connection, ":a"),
+        "Text"
+      )
+    );
+
+    assertEquals(
+      100, // SQLite ROWS
+      SCCoreGlue.scc_step(connection)
+    );
+
+    assertEquals(
+      2,
+      SCCoreGlue.scc_get_column_count(connection)
+    );
+
+    assertEquals(
+      "absValue",
+      SCCoreGlue.scc_get_column_name(connection, 0)
+    );
+
+    assertEquals(
+      SCCoreGlue.SCC_COLUMN_TYPE_FLOAT,
+      SCCoreGlue.scc_get_column_type(connection, 0)
+    );
+
+    assertEquals(
+      123.456,
+      SCCoreGlue.scc_get_column_double(connection, 0)
+    );
+
+    assertEquals(
+      "upperValue",
+      SCCoreGlue.scc_get_column_name(connection, 1)
+    );
+
+    assertEquals(
+      SCCoreGlue.SCC_COLUMN_TYPE_TEXT,
+      SCCoreGlue.scc_get_column_type(connection, 1)
+    );
+
+    assertEquals(
+      "TEXT",
+      SCCoreGlue.scc_get_column_text(connection, 1)
+    );
+
+    assertEquals(
+      101, // SQLite DONE
+      SCCoreGlue.scc_step(connection)
+    );
+
+    assertEquals(
+      0, // SQLite OK
+      SCCoreGlue.scc_end_statement(connection)
+    );
+  }
+
   public static void main(String [] args) {
     test_1();
     test_2();
@@ -588,6 +670,8 @@ class SCCoreGlueTest {
     test_11();
 
     test_21();
+
+    test_31();
   }
 
   static {

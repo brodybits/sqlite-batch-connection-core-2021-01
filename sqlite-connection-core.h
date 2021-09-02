@@ -24,6 +24,8 @@ int scc_open_connection(const char * filename, int flags);
 
 int scc_begin_statement(int connection_id, const char * statement);
 
+int scc_bind_parameter_index(int connection_id, const char * name);
+
 int scc_bind_text(int connection_id, int index, const char * text);
 
 int scc_bind_double(int connection_id, int index, double value);

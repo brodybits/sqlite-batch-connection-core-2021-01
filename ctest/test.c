@@ -800,6 +800,93 @@ static void test_21() {
   TEST_ASSERT_ALWAYS(connection_id < 0);
 }
 
+static void test_31() {
+  const int connection_id = test_open_memory_connection(__func__);
+
+  TEST_ASSERT_ALWAYS(connection_id > 0);
+
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
+    scc_begin_statement(
+      connection_id,
+      "SELECT ABS(:b) AS absValue, UPPER(:a) AS upperValue"
+    )
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
+    scc_bind_text(
+      connection_id,
+      scc_bind_parameter_index(connection_id, ":a"),
+      "Text"
+    )
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
+    scc_bind_double(
+      connection_id,
+      scc_bind_parameter_index(connection_id, ":b"),
+      -123.456
+    )
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    0, // no valid parameter index for bogus parameter name
+    scc_bind_parameter_index(connection_id, ":bogus")
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    100, // SQLite ROWS
+    scc_step(connection_id)
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    2,
+    scc_get_column_count(connection_id)
+  );
+
+  TEST_ASSERT_STRING_EQUALS(
+    "absValue",
+    scc_get_column_name(connection_id, 0)
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    SCC_COLUMN_TYPE_FLOAT,
+    scc_get_column_type(connection_id, 0)
+  );
+
+  TEST_ASSERT_DOUBLE_EQUALS(
+    123.456,
+    scc_get_column_double(connection_id, 0)
+  );
+
+  TEST_ASSERT_STRING_EQUALS(
+    "upperValue",
+    scc_get_column_name(connection_id, 1)
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    SCC_COLUMN_TYPE_TEXT,
+    scc_get_column_type(connection_id, 1)
+  );
+
+  TEST_ASSERT_STRING_EQUALS(
+    "TEXT",
+    scc_get_column_text(connection_id, 1)
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    101, // SQLite DONE
+    scc_step(connection_id)
+  );
+
+  TEST_ASSERT_INT_EQUALS(
+    0, // SQLite OK
+    scc_end_statement(connection_id)
+  );
+}
+
 int main(int argc, char ** argv) {
   test_init();
 
@@ -816,4 +903,6 @@ int main(int argc, char ** argv) {
   test_12();
 
   test_21();
+
+  test_31();
 }
