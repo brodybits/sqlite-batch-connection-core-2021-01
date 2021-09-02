@@ -66,7 +66,7 @@ with support available here: [github.com / brodybits / ask-me-anything / issues]
 
 - For Apache Cordova, a helper plugin such as `cordova-sqlite-storage-file` (recommended) or `cordova-plugin-file` (recommended for external filesystem access on Android) should be used to resolve an absolute database file path before opening it. Similar helper components would be recommended on React Native.
 - The `sqlite-connection-core.h` API header file and Java interface class have very limited documentation comments.
-- Missing both demonstration and formal documentation of SQLiteBatchCore class for Android and iOS, which is demonstrated in `cordova-sqlite-demo-plugin` subdirectory of `cordova-demo`.
+- Missing formal tests, demonstration, and documentation of SQLiteBatchCore class for Android and iOS, which is demonstrated in `cordova-sqlite-demo-plugin` subdirectory of `cordova-demo`.
 
 ## Samples
 
